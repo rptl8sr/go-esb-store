@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-
+	"go-esb-store/internal/app"
 	"go-esb-store/internal/config"
-	"go-esb-store/internal/esb"
 	"go-esb-store/internal/model"
 	"go-esb-store/pkg/logger"
 	"go-esb-store/pkg/trigger"
@@ -30,12 +28,12 @@ func Handler(ctx context.Context, event interface{}) (*Response, error) {
 	}
 	logger.Info("main.Handler: Starting...", "trigger_type", triggerType)
 
-	esbClient, err := esb.New(&cfg.ESB)
+	a, err := app.New(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
-	tgClient, err := tgbotapi.NewBotAPI(cfg.Telegram.Token)
-	if err != nil {
+
+	if err = a.Run(ctx); err != nil {
 		return nil, err
 	}
 
