@@ -1,0 +1,111 @@
+openapi: 3.0.0
+info:
+  title: Go Store State Observer
+  description: API doc to generate clients only
+  version: 1.0.0
+
+servers:
+  - url: https://localhost
+    description: Placeholder, actual URL from env
+
+security:
+  - BearerAuth: []
+
+paths:
+  /RetailStoresESB/$count:
+    get:
+      operationId: getStoresCount
+      tags:
+        - stores
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - "PrimaryCountryRegionId eq 'RUS'"
+          example: "PrimaryCountryRegionId eq 'RUS'"
+      responses:
+        '200':
+          description: Stores count result
+          content:
+            text/plain:
+              schema:
+                type: integer
+                format: int32
+  /RetailStoresESB:
+    get:
+      operationId: getStores
+      tags:
+        - stores
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - "PrimaryCountryRegionId eq 'RUS'"
+          example: "PrimaryCountryRegionId eq 'RUS'"
+        - name: skip
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+          example: 10
+        - name: top
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 500
+          example: 500
+      responses:
+        '200':
+          description: List of stores
+          content:
+            application/json:
+                schema:
+                  $ref: '#/components/schemas/StoreResponse'
+
+components:
+  schemas:
+    Store:
+      type: object
+      properties:
+        StoreFactsNumber:
+          type: string
+          description: Store number
+        NameAlias:
+          type: string
+          description: Store name
+        PrimaryAddress:
+          type: string
+          description: Store address
+        FacilityShoppingCenterName:
+          type: string
+          description: Mall name
+        FranchiseePartnerName:
+          type: string
+          description: Company name
+        BrandId:
+          type: string
+          description: Brand identifier
+
+    StoreResponse:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Store'
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: string
+
+
