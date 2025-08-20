@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log/slog"
 
 	"go-esb-store/internal/app"
@@ -28,8 +29,17 @@ func Handler(ctx context.Context, event interface{}) (*Response, error) {
 	}
 	logger.Info("main.Handler: Starting...", "trigger_type", triggerType)
 
+	tgClient, err := tgbotapi.NewBotAPI(cfg.Telegram.Token)
+	if err != nil {
+		return nil, err
+	}
+
 	a, err := app.New(ctx, cfg)
 	if err != nil {
+		msg := tgbotapi.NewMessage(cfg.Telegram.ChatID, err.Error())
+		if _, errSend := tgClient.Send(msg); errSend != nil {
+			logger.Error(errSend.Error())
+		}
 		return nil, err
 	}
 
