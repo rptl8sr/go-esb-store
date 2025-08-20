@@ -1,4 +1,4 @@
-package esb
+package utils
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"unicode"
 )
 
-func cleanString(s string) string {
+func CleanString(s string) string {
 	s = strings.TrimPrefix(s, "\uFEFF")
 	s = strings.TrimSpace(s)
 	return strings.Map(func(r rune) rune {
@@ -19,7 +19,7 @@ func cleanString(s string) string {
 	}, s)
 }
 
-func parseTimeString(s string) (time.Time, error) {
+func ParseTimeString(s string) (time.Time, error) {
 	// RFC3339
 	if t, err := time.Parse(time.RFC3339, s); err == nil {
 		return t, nil

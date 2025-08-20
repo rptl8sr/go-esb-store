@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go-esb-store/internal/utils"
 	"math"
 	"net/http"
 	"strconv"
@@ -124,7 +125,7 @@ func (c *ClientWithDefaults) getStoresPagesCount(ctx context.Context) (int, erro
 		return -1, fmt.Errorf("%w: %s", ErrUnexpectedStatus, res.Status())
 	}
 
-	cleanedBody := cleanString(string(res.Body))
+	cleanedBody := utils.CleanString(string(res.Body))
 	count, err := strconv.Atoi(cleanedBody)
 	if err != nil {
 		logger.Error("esb.getStoresPagesCount: atoi failed", "error", err, "body", cleanedBody)
