@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ydb-platform/ydb-go-sdk/v3"
@@ -17,6 +18,7 @@ import (
 )
 
 const (
+	defaultBatchSize       = 500
 	storesTableNameDefault = "stores"
 )
 
@@ -24,6 +26,7 @@ type Client struct {
 	driver       *ydb.Driver
 	databaseName string
 	tablesMap    map[string]string
+	batchSize    int
 }
 
 func NewYDBClient(ctx context.Context, cfg *config.YDB) (*Client, error) {
@@ -45,6 +48,7 @@ func NewYDBClient(ctx context.Context, cfg *config.YDB) (*Client, error) {
 		driver:       driver,
 		databaseName: cfg.DatabaseName,
 		tablesMap:    cfg.TablesMap,
+		batchSize:    cfg.BatchSize,
 	}
 
 	if cfg.Mode == model.Dev {
@@ -65,6 +69,53 @@ func (c *Client) SetStores(ctx context.Context, stores []model.Store) error {
 		return nil
 	}
 
+	batchSize := c.batchSize
+	if batchSize < 1 {
+		batchSize = defaultBatchSize
+	}
+
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	var wg sync.WaitGroup
+	errCh := make(chan error, 1)
+
+	for i := 0; i < len(stores); i += batchSize {
+		end := i + batchSize
+		if end > len(stores) {
+			end = len(stores)
+		}
+		batch := stores[i:end]
+
+		wg.Add(1)
+		go func(b []model.Store) {
+			defer wg.Done()
+
+			if err := c.setStores(ctx, b); err != nil {
+				select {
+				case errCh <- err:
+					cancel()
+				default:
+				}
+			}
+		}(batch)
+	}
+
+	wg.Wait()
+
+	select {
+	case err := <-errCh:
+		return err
+	default:
+		return nil
+	}
+}
+
+func (c *Client) setStores(ctx context.Context, stores []model.Store) error {
+	if len(stores) == 0 {
+		return nil
+	}
+
 	var tableName string
 	if v, ok := c.tablesMap[storesTableNameDefault]; !ok {
 		tableName = storesTableNameDefault
@@ -73,20 +124,19 @@ func (c *Client) SetStores(ctx context.Context, stores []model.Store) error {
 	}
 
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("upsert into %s (number, name, address, mall, company, brand, format, status, temporary_closed) values\n", tableName))
+	b.WriteString(fmt.Sprintf("upsert into %s (number, name, address, mall, franchise, brand, format, status) values\n", tableName))
 
 	for i, s := range stores {
 		fmt.Fprintf(&b,
-			"(%d,%s,%s,%s,%s,%s,%s,%s,%t)",
+			"(%d,%s,%s,%s,%s,%s,%s,%s)",
 			s.Number,
 			quoteYQL(s.Name),
 			quoteYQL(s.Address),
 			quoteYQL(s.Mall),
-			quoteYQL(s.Company),
+			quoteYQL(s.Franchise),
 			quoteYQL(s.Brand),
 			quoteYQL(s.Format),
 			string(s.Status),
-			s.TemporaryClosed,
 		)
 
 		if i < len(stores)-1 {
@@ -125,11 +175,11 @@ func (c *Client) initTables(ctx context.Context) error {
 	    name Utf8,
 	    address Utf8,
 	    mall Utf8,
-	    company Utf8,
+	    franchise Utf8,
 	    brand Utf8,
 	    format Utf8,
 	    status Utf8,
-	    temporary_closed Bool,
+	    temporary_closed Bool default True,
 	    primary key (number),
 	    index idx_stores_name global on (name) cover (number)
 	);`, tableName)
