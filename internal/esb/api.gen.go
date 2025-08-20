@@ -19,6 +19,17 @@ const (
 	BearerAuthScopes = "BearerAuth.Scopes"
 )
 
+// Defines values for Status.
+const (
+	Closed       Status = "Closed"
+	Dead         Status = "Dead"
+	LessThannil  Status = "<nil>"
+	New          Status = "New"
+	Open         Status = "Open"
+	PreOpening   Status = "PreOpening"
+	Refranchised Status = "Refranchised"
+)
+
 // Defines values for GetStoresParamsFilter.
 const (
 	GetStoresParamsFilterPrimaryCountryRegionIdEqRUS GetStoresParamsFilter = "PrimaryCountryRegionId eq 'RUS'"
@@ -28,6 +39,9 @@ const (
 const (
 	GetStoresCountParamsFilterPrimaryCountryRegionIdEqRUS GetStoresCountParamsFilter = "PrimaryCountryRegionId eq 'RUS'"
 )
+
+// Status defines model for Status.
+type Status string
 
 // Store defines model for Store.
 type Store struct {
@@ -45,9 +59,13 @@ type Store struct {
 
 	// PrimaryAddress Store address
 	PrimaryAddress *string `json:"PrimaryAddress,omitempty"`
+	Status         *Status `json:"Status,omitempty"`
 
 	// StoreFactsNumber Store number
 	StoreFactsNumber *string `json:"StoreFactsNumber,omitempty"`
+
+	// StoreFormatId Store format
+	StoreFormatId *string `json:"StoreFormatId,omitempty"`
 }
 
 // StoreResponse defines model for StoreResponse.

@@ -72,6 +72,16 @@ paths:
 
 components:
   schemas:
+    Status:
+      type: string
+      enum:
+        - Dead
+        - Closed
+        - Refranchised
+        - Open
+        - New
+        - PreOpening
+        -
     Store:
       type: object
       properties:
@@ -93,6 +103,11 @@ components:
         BrandId:
           type: string
           description: Brand identifier
+        StoreFormatId:
+          type: string
+          description: Store format
+        Status:
+          $ref: '#/components/schemas/Status'
 
     StoreResponse:
       type: object
