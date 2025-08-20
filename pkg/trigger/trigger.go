@@ -8,11 +8,11 @@ import (
 type Source string
 
 const (
-	httpSource      Source = "http"
-	timerSource     Source = "timer"
-	localSource     Source = "local"
-	unknownSource   Source = "unknown"
-	notParsedSource Source = "not parsed"
+	HttpSource      Source = "http"
+	TimerSource     Source = "timer"
+	LocalSource     Source = "local"
+	UnknownSource   Source = "unknown"
+	NotParsedSource Source = "not parsed"
 )
 
 // LocalEvent represents a locally generated event with a single body field in JSON format.
@@ -39,30 +39,30 @@ type HTTPEvent struct {
 func DetectType(event interface{}) string {
 	eventBytes, err := json.Marshal(event)
 	if err != nil {
-		return string(notParsedSource)
+		return string(NotParsedSource)
 	}
 
 	// Local Event
 	var localEvent LocalEvent
 	err = json.Unmarshal(eventBytes, &localEvent)
-	if err == nil && localEvent.Body != "" && localEvent.Body == string(localSource) {
-		return string(localSource)
+	if err == nil && localEvent.Body != "" && localEvent.Body == string(LocalSource) {
+		return string(LocalSource)
 	}
 
 	// TimerEvent
 	var timerEvent TimerEvent
 	err = json.Unmarshal(eventBytes, &timerEvent)
 	if err == nil && timerEvent.Details.TriggerID != "" {
-		return fmt.Sprintf("%s: %s", timerSource, timerEvent.Details.TriggerID)
+		return fmt.Sprintf("%s: %s", TimerSource, timerEvent.Details.TriggerID)
 	}
 
 	// HTTPEvent
 	var httpEvent HTTPEvent
 	err = json.Unmarshal(eventBytes, &httpEvent)
 	if err == nil && httpEvent.HTTPMethod != "" {
-		return string(httpSource)
+		return string(HttpSource)
 	}
 
 	// Default
-	return string(unknownSource)
+	return string(UnknownSource)
 }
