@@ -33,18 +33,19 @@ type ESB struct {
 }
 
 type Telegram struct {
-	Token string `env:"TG_TOKEN" required:"true"`
+	Token  string `env:"TG_TOKEN" required:"true"`
+	ChatID int64  `env:"TG_CHAT_ID" required:"true"`
 }
 
 type YDB struct {
-	BaseURL       url.URL           `env:"YDB_BASE_URL" required:"true"`
-	Path          string            `env:"YDB_PATH" required:"true"`
-	CredsFile     string            `env:"YDB_CREDS_FILE" required:"true"`
-	DatabaseName  string            `env:"YDB_DATABASE_NAME" required:"true"`
-	TablesMap     map[string]string `env:"YDB_TABLES_MAP" required:"true"`
-	LimitPageSize int               `env:"YDB_LIMIT_PAGE_SIZE" envDefault:"1000"`
-	Timeout       int               `env:"YDB_TIMEOUT" envDefault:"60"`
-	Mode          model.Mode
+	BaseURL      url.URL           `env:"YDB_BASE_URL" required:"true"`
+	Path         string            `env:"YDB_PATH" required:"true"`
+	CredsFile    string            `env:"YDB_CREDS_FILE" required:"true"`
+	DatabaseName string            `env:"YDB_DATABASE_NAME" required:"true"`
+	TablesMap    map[string]string `env:"YDB_TABLES_MAP" required:"true"`
+	BatchSize    int               `env:"YDB_BATCH_SIZE" envDefault:"500"`
+	Timeout      int               `env:"YDB_TIMEOUT" envDefault:"60"`
+	Mode         model.Mode
 }
 
 func Must() *Config {
