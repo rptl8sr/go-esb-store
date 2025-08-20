@@ -32,7 +32,6 @@ type ESB struct {
 }
 
 type Telegram struct {
-	Mode  model.Mode
 	Token string `env:"TG_TOKEN" required:"true"`
 }
 
@@ -42,8 +41,6 @@ func Must() *Config {
 	if err := env.Parse(&config); err != nil {
 		log.Fatalln(err)
 	}
-
-	config.Telegram.Mode = config.App.Mode
 
 	return &config
 }
