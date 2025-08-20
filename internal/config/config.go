@@ -16,6 +16,7 @@ type Config struct {
 	App      App
 	ESB      ESB
 	Telegram Telegram
+	YDB      YDB
 }
 
 type App struct {
@@ -35,12 +36,25 @@ type Telegram struct {
 	Token string `env:"TG_TOKEN" required:"true"`
 }
 
+type YDB struct {
+	BaseURL       url.URL           `env:"YDB_BASE_URL" required:"true"`
+	Path          string            `env:"YDB_PATH" required:"true"`
+	CredsFile     string            `env:"YDB_CREDS_FILE" required:"true"`
+	DatabaseName  string            `env:"YDB_DATABASE_NAME" required:"true"`
+	TablesMap     map[string]string `env:"YDB_TABLES_MAP" required:"true"`
+	LimitPageSize int               `env:"YDB_LIMIT_PAGE_SIZE" envDefault:"1000"`
+	Timeout       int               `env:"YDB_TIMEOUT" envDefault:"60"`
+	Mode          model.Mode
+}
+
 func Must() *Config {
 	var config Config
 
 	if err := env.Parse(&config); err != nil {
 		log.Fatalln(err)
 	}
+
+	config.YDB.Mode = config.App.Mode
 
 	return &config
 }
