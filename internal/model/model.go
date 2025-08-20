@@ -16,6 +16,7 @@ const (
 	Open         Status = "Open"
 	New          Status = "New"
 	PreOpening   Status = "PreOpening"
+	Undefined    Status = "Undefined"
 )
 
 type Store struct {
@@ -23,7 +24,7 @@ type Store struct {
 	Name            string
 	Address         string
 	Mall            string
-	Company         string
+	Franchise       string
 	Brand           string
 	Format          string
 	Status          Status
