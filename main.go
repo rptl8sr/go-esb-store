@@ -12,7 +12,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	e := &trigger.LocalEvent{Body: "local event"}
+	e := &trigger.LocalEvent{Body: string(trigger.LocalSource)}
 
 	res, err := Handler(ctx, e)
 	if err != nil {

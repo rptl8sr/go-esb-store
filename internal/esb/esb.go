@@ -44,6 +44,8 @@ func newClient(cfg *config.ESB) (*ClientWithResponses, error) {
 }
 
 func (c *ClientWithDefaults) GetStores(ctx context.Context) ([]Store, error) {
+	logger.Debug("esb.GetStores: start getting stores pages count")
+
 	pages, err := c.getStoresPagesCount(ctx)
 	if err != nil {
 		logger.Error("esb.GetStores: error getting stores", "error", err)
@@ -53,6 +55,7 @@ func (c *ClientWithDefaults) GetStores(ctx context.Context) ([]Store, error) {
 		logger.Error(fmt.Sprintf("esb.GetStores: %s", ErrNoPageToFetch))
 		return nil, ErrNoPageToFetch
 	}
+	logger.Debug("esb.GetStores: pages ", "pages", pages)
 
 	var (
 		wg     sync.WaitGroup
@@ -65,6 +68,7 @@ func (c *ClientWithDefaults) GetStores(ctx context.Context) ([]Store, error) {
 		wg.Add(1)
 		page := i
 		go func() {
+			logger.Debug("esb.GetStores: start goroutine with getting stores page", "page", page)
 			defer wg.Done()
 
 			storesPage, er := c.getStoresPageData(ctx, page)
@@ -79,6 +83,7 @@ func (c *ClientWithDefaults) GetStores(ctx context.Context) ([]Store, error) {
 			mu.Lock()
 			stores = append(stores, storesPage...)
 			mu.Unlock()
+			logger.Debug("esb.GetStores: goroutine finished successfully", "page", page)
 		}()
 	}
 

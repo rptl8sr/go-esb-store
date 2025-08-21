@@ -20,9 +20,10 @@ type Config struct {
 }
 
 type App struct {
-	Version  string     `env:"APP_VERSION" env-default:"0.0.1"`
-	LogLevel slog.Level `env:"APP_LOG_LEVEL" env-default:"info"`
-	Mode     model.Mode `env:"APP_MODE" env-default:"prod"`
+	Name     string     `env:"APP_NAME" envDefault:"esb"`
+	Version  string     `env:"APP_VERSION" envDefault:"0.0.1"`
+	LogLevel slog.Level `env:"APP_LOG_LEVEL" envDefault:"info"`
+	Mode     model.Mode `env:"APP_MODE" envDefault:"prod"`
 }
 
 type ESB struct {

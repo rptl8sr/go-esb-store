@@ -19,11 +19,13 @@ type App struct {
 }
 
 func New(ctx context.Context, cfg *config.Config) (*App, error) {
+	logger.Debug("app.New: init esb client")
 	esbClient, err := esb.NewESBClient(&cfg.ESB)
 	if err != nil {
 		return nil, err
 	}
 
+	logger.Debug("app.New: init ydb client")
 	ydbClient, err := ydb.NewYDBClient(ctx, &cfg.YDB)
 	if err != nil {
 		return nil, err
@@ -118,7 +120,7 @@ func (a *App) rawToModelStore(rawStore esb.Store) (*model.Store, error) {
 	}
 
 	// Optional: Brand
-	if rawStore.BrandId != nil && *rawStore.BrandId == "" {
+	if rawStore.BrandId != nil && *rawStore.BrandId != "" {
 		store.Brand = utils.CleanString(*rawStore.BrandId)
 	} else {
 		logger.Warn("service.rawToModelStore: empty store brand", "rawStore", rawStore)

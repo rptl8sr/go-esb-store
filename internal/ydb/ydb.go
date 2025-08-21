@@ -31,14 +31,19 @@ type Client struct {
 
 func NewYDBClient(ctx context.Context, cfg *config.YDB) (*Client, error) {
 	creds, ca, err := initCreds(cfg.Mode, cfg.CredsFile)
+	if err != nil {
+		return nil, err
+	}
+	logger.Debug("ydb.NewYDBClient: creds inited", "mode", cfg.Mode)
 
 	driver, err := ydb.Open(
 		ctx,
 		cfg.BaseURL.JoinPath(cfg.Path).String(),
 		ca,
 		creds,
-		ydb.WithDialTimeout(time.Duration(cfg.Timeout)),
+		ydb.WithDialTimeout(time.Duration(cfg.Timeout)*time.Second),
 	)
+	logger.Debug("ydb.NewYDBClient: open driver", "driver", driver)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to YDB: %s", err)
@@ -55,6 +60,7 @@ func NewYDBClient(ctx context.Context, cfg *config.YDB) (*Client, error) {
 		if err = c.initTables(ctx); err != nil {
 			return nil, err
 		}
+		logger.Debug("app.New: table created", "table", c.databaseName)
 	}
 
 	return c, nil
@@ -136,7 +142,7 @@ func (c *Client) setStores(ctx context.Context, stores []model.Store) error {
 			quoteYQL(s.Franchise),
 			quoteYQL(s.Brand),
 			quoteYQL(s.Format),
-			string(s.Status),
+			quoteYQL(string(s.Status)),
 		)
 
 		if i < len(stores)-1 {
@@ -161,6 +167,12 @@ func (c *Client) exec(ctx context.Context, query string, params *table.QueryPara
 	})
 }
 
+func (c *Client) execScheme(ctx context.Context, query string) error {
+	return c.driver.Table().Do(ctx, func(ctx context.Context, s table.Session) error {
+		return s.ExecuteSchemeQuery(ctx, query)
+	})
+}
+
 func (c *Client) initTables(ctx context.Context) error {
 	var tableName string
 	if v, ok := c.tablesMap[storesTableNameDefault]; !ok {
@@ -169,8 +181,7 @@ func (c *Client) initTables(ctx context.Context) error {
 		tableName = v
 	}
 
-	query := fmt.Sprintf(`
-	create table if not exists stores (
+	query := fmt.Sprintf(`create table if not exists %s (
 	    number Int64,
 	    name Utf8,
 	    address Utf8,
@@ -179,12 +190,12 @@ func (c *Client) initTables(ctx context.Context) error {
 	    brand Utf8,
 	    format Utf8,
 	    status Utf8,
-	    temporary_closed Bool default True,
+	    temporary_closed Bool,
 	    primary key (number),
-	    index idx_stores_name global on (name) cover (number)
+	    index idx_stores_name global on (name)
 	);`, tableName)
 
-	if err := c.exec(ctx, query, nil); err != nil {
+	if err := c.execScheme(ctx, query); err != nil {
 		logger.Error("ydb.initTables: failed to init tables", "error", err)
 		return err
 	}
@@ -206,6 +217,8 @@ func initCreds(mode model.Mode, p string) (ydb.Option, ydb.Option, error) {
 			return nil, nil, fmt.Errorf("creds file is required in dev mode")
 		}
 		creds = ycdev.WithServiceAccountKeyFileCredentials(p)
+	default:
+		return nil, nil, fmt.Errorf("mode '%s' not supported", mode)
 	}
 
 	return creds, ca, nil

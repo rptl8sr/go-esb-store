@@ -29,6 +29,7 @@ func Handler(ctx context.Context, event interface{}) (*Response, error) {
 	}
 	logger.Info("main.Handler: Starting...", "trigger_type", triggerType)
 
+	logger.Debug("main.Handler: init telegram client")
 	tgClient, err := tgbotapi.NewBotAPI(cfg.Telegram.Token)
 	if err != nil {
 		return nil, err
@@ -36,7 +37,7 @@ func Handler(ctx context.Context, event interface{}) (*Response, error) {
 
 	a, err := app.New(ctx, cfg)
 	if err != nil {
-		msg := tgbotapi.NewMessage(cfg.Telegram.ChatID, err.Error())
+		msg := tgbotapi.NewMessage(cfg.Telegram.ChatID, fmt.Sprintf("%s %s: %s", cfg.App.Name, cfg.App.Version, err.Error()))
 		if _, errSend := tgClient.Send(msg); errSend != nil {
 			logger.Error(errSend.Error())
 		}
@@ -44,6 +45,10 @@ func Handler(ctx context.Context, event interface{}) (*Response, error) {
 	}
 
 	if err = a.Run(ctx); err != nil {
+		msg := tgbotapi.NewMessage(cfg.Telegram.ChatID, fmt.Sprintf("%s %s\n\n\n%s", cfg.App.Name, cfg.App.Version, err.Error()))
+		if _, errSend := tgClient.Send(msg); errSend != nil {
+			logger.Error(errSend.Error())
+		}
 		return nil, err
 	}
 
