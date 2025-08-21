@@ -115,7 +115,7 @@ func (a *App) rawToModelStore(rawStore esb.Store) (*model.Store, error) {
 	if rawStore.FranchiseePartnerName != nil && *rawStore.FranchiseePartnerName != "" {
 		store.Franchise = utils.CleanString(*rawStore.FranchiseePartnerName)
 	} else {
-		logger.Warn("service.rawToModelStore: empty store franchise", "rawStore", rawStore)
+		logger.Debug("service.rawToModelStore: empty store franchise", "rawStore", rawStore)
 		store.Franchise = ""
 	}
 
@@ -123,7 +123,7 @@ func (a *App) rawToModelStore(rawStore esb.Store) (*model.Store, error) {
 	if rawStore.BrandId != nil && *rawStore.BrandId != "" {
 		store.Brand = utils.CleanString(*rawStore.BrandId)
 	} else {
-		logger.Warn("service.rawToModelStore: empty store brand", "rawStore", rawStore)
+		logger.Debug("service.rawToModelStore: empty store brand", "rawStore", rawStore)
 		store.Brand = ""
 	}
 
@@ -131,7 +131,7 @@ func (a *App) rawToModelStore(rawStore esb.Store) (*model.Store, error) {
 	if rawStore.StoreFormatId != nil && *rawStore.StoreFormatId != "" {
 		store.Format = utils.CleanString(*rawStore.StoreFormatId)
 	} else {
-		logger.Warn("service.rawToModelStore: empty store format", "rawStore", rawStore)
+		logger.Debug("service.rawToModelStore: empty store format", "rawStore", rawStore)
 		store.Format = ""
 	}
 
