@@ -4,3 +4,4 @@
 .env
 .DS_Store
 /authorized_key.json
+/ydb_status_watcher.json

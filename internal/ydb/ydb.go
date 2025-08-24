@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/ydb-platform/ydb-go-sdk/v3"
 	"github.com/ydb-platform/ydb-go-sdk/v3/table"
@@ -41,9 +40,9 @@ func NewYDBClient(ctx context.Context, cfg *config.YDB) (*Client, error) {
 		cfg.BaseURL.JoinPath(cfg.Path).String(),
 		ca,
 		creds,
-		ydb.WithDialTimeout(time.Duration(cfg.Timeout)*time.Second),
+		ydb.WithDialTimeout(cfg.Timeout),
 	)
-	logger.Debug("ydb.NewYDBClient: open driver", "driver", driver)
+	logger.Debug("ydb.NewYDBClient: open driver")
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to YDB: %s", err)

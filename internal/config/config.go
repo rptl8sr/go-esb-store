@@ -45,7 +45,7 @@ type YDB struct {
 	DatabaseName string            `env:"YDB_DATABASE_NAME" required:"true"`
 	TablesMap    map[string]string `env:"YDB_TABLES_MAP" required:"true"`
 	BatchSize    int               `env:"YDB_BATCH_SIZE" envDefault:"500"`
-	Timeout      int               `env:"YDB_TIMEOUT" envDefault:"60"`
+	Timeout      time.Duration     `env:"YDB_TIMEOUT" envDefault:"60s"`
 	Mode         model.Mode
 }
 
