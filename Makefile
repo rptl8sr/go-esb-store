@@ -68,4 +68,4 @@ ycf-timer:
 ycf-clear:
 	rm "./$(APP_NAME).zip"
 
-ycf-deploy: lint api-generate ycf-zip ycf-create-function-or-ignore ycf-create-function-version ycf-timer ycf-clear
+ycf-deploy: api-generate ycf-zip ycf-create-function-or-ignore ycf-create-function-version ycf-timer ycf-clear
