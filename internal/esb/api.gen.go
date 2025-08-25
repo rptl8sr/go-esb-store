@@ -51,7 +51,7 @@ type Store struct {
 	// FacilityShoppingCenterName Mall name
 	FacilityShoppingCenterName *string `json:"FacilityShoppingCenterName,omitempty"`
 
-	// FranchiseePartnerName Franchise name
+	// FranchiseePartnerName Company name
 	FranchiseePartnerName *string `json:"FranchiseePartnerName,omitempty"`
 
 	// NameAlias Store name
